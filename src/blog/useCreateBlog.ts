@@ -15,28 +15,29 @@ export const useCreateBlog = () => {
       });
 
       if (!response.ok) {
-        throw new Error('Some error message');
+        const error = await response.json();
+
+        throw new Error(`Error Creating Blog: ${error.message}`);
       }
 
-      const data = await response.json();
-      // console.log('NEW BLOG RESPONSE: ', data);
+      const data: Blog = await response.json();
+
       return BlogData.parse(data);
     },
     {
-      //   onMutate: async (blog: Blog) => {
-      //     // Cancel current queries for the blogs
-      //     await queryClient.cancelQueries(['blogs']);
+      onMutate: async (blog: Blog) => {
+        // Cancel current queries for the blogs
+        await queryClient.cancelQueries(['blogs']);
 
-      //     // Get current blogs
-      //     const currentBlogs = queryClient.getQueryData<Blog[]>(['blogs']);
-      //     //   console.log('CURRENT BLOGS: ', currentBlogs);
+        // Get current blogs
+        const currentBlogs = queryClient.getQueryData<Blog[]>(['blogs']);
 
-      //     // Optimistically add blog to current cache
-      //     queryClient.setQueryData<Blog[]>(['blogs'], oldBlogs => [...oldBlogs, blog]);
+        // Optimistically add blog to current cache
+        queryClient.setQueryData<Blog[]>(['blogs'], oldBlogs => [...oldBlogs, blog]);
 
-      //     // Return current list of blogs, so we can rollback in case of failure.
-      //     return { currentBlogs };
-      //   },
+        // Return current list of blogs, so we can rollback in case of failure.
+        return { currentBlogs };
+      },
       onSettled: (): void => {
         queryClient.invalidateQueries(['blogs']);
       },

@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 
 import { BLOGS_API } from './blog.constants';
-import { BlogData } from './useBlogs';
+import { Blog, BlogData } from './useBlogs';
 
 export const useBlog = (id: number) =>
   useQuery(
@@ -10,10 +10,12 @@ export const useBlog = (id: number) =>
       const response = await fetch(`${BLOGS_API}/${id}`);
 
       if (!response.ok) {
-        throw new Error('Some error message');
+        const error = await response.json();
+
+        throw new Error(`Error fetching blog: ${id}, Message: ${error.message}`);
       }
 
-      const data = await response.json();
+      const data: Blog = await response.json();
 
       return BlogData.parse(data);
     },

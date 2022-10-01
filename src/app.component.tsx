@@ -1,13 +1,18 @@
 import React, { FC, ReactElement } from 'react';
 
+import { ErrorBoundary } from 'react-error-boundary';
+import { NotificationContainer } from 'react-notifications';
 import { Link, Route, Routes } from 'react-router-dom';
 
+import { ErrorFallback, errorHandler } from '~/components/error-fallback.component';
 import Footer from '~/layout/footer.component';
 import Header from '~/layout/header.component';
 
 import { BlogList } from './blog/blog-list.component';
 import { EditBlog } from './blog/edit-blog.component';
 import { NewBlog } from './blog/new-blog.component';
+
+import 'react-notifications/lib/notifications.css';
 
 interface ButtonLinkProps {
   to: string;
@@ -30,16 +35,30 @@ const App: FC = (): ReactElement => (
     <Header />
 
     <main className="grow">
-      <div className="flex">
-        <BlogList className="" />
-        <Routes>
-          <Route element={<EditBlog />} path=":id" />
-          <Route element={<NewBlog />} path="/create" />
-        </Routes>
-      </div>
-      <ButtonLink to="/create">
-        <span>New Blog</span>
-      </ButtonLink>
+      <NotificationContainer />
+
+      <ErrorBoundary
+        FallbackComponent={ErrorFallback}
+        onError={errorHandler}
+        onReset={() => console.log('Resetting after error')}
+      >
+        <div className="flex">
+          <BlogList className="" />
+          <ErrorBoundary
+            FallbackComponent={ErrorFallback}
+            onError={errorHandler}
+            onReset={() => console.log('Resetting after error')}
+          >
+            <Routes>
+              <Route element={<EditBlog />} path=":id" />
+              <Route element={<NewBlog />} path="/create" />
+            </Routes>
+          </ErrorBoundary>
+        </div>
+        <ButtonLink to="/create">
+          <span>New Blog</span>
+        </ButtonLink>
+      </ErrorBoundary>
     </main>
 
     <Footer />

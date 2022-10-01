@@ -1,5 +1,7 @@
 import React, { FC, ReactNode } from 'react';
 
+import { NotificationManager } from 'react-notifications';
+
 import { User } from '~/accounts/useUser';
 
 import { ButtonLink } from '../app.component';
@@ -29,7 +31,11 @@ const BlogListButton: FC<BlogListButtonProps> = ({ onClick, disabled, children }
 );
 
 export const BlogListItem: FC<Props> = ({ blog, user, page }) => {
-  const deleteMutation = useDeleteBlog();
+  const { mutate: deleteBlog, isSuccess } = useDeleteBlog();
+
+  if (isSuccess) {
+    NotificationManager.success(`Successful deletion of Blog: ${blog.id}`, 'Successful Blog Deletion');
+  }
 
   return (
     <li className="flex cursor-pointer justify-between border-2 border-gray-900 bg-gray-500 p-2">
@@ -47,7 +53,7 @@ export const BlogListItem: FC<Props> = ({ blog, user, page }) => {
           disabled={blog.ownerId !== user.id}
           onClick={() => {
             console.log('Deleting: ', blog);
-            deleteMutation.mutate({ id: blog.id, page });
+            deleteBlog({ id: blog.id, page });
           }}
         >
           Delete

@@ -11,7 +11,17 @@ import './i18n/i18n';
 
 import './index.css';
 
-const queryClient = new QueryClient();
+const queryClientConfig = {
+  defaultOptions: {
+    queries: {
+      useErrorBoundary: true,
+    },
+    mutations: {
+      useErrorBoundary: true,
+    },
+  },
+};
+const queryClient = new QueryClient(queryClientConfig);
 
 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
 ReactDOM.createRoot(document.getElementById('root')!).render(

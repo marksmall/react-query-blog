@@ -14,7 +14,9 @@ export const useUpdateBlog = () => {
       });
 
       if (!response.ok) {
-        throw new Error('Some error message');
+        const error = await response.json();
+
+        throw new Error(`Error updating blog: ${blog.id}, Message: ${error.message}`);
       }
 
       const data: Blog = await response.json();
@@ -22,29 +24,23 @@ export const useUpdateBlog = () => {
       return BlogData.parse(data);
     },
     {
-      //   onMutate: async updated => {
-      //     console.log('UPDATED: ', updated);
-      //     // console.log('onMUTATE VARIABLES: ', { id, page });
-      //     //   // Cancel current queries for the blogs
-      //     await queryClient.cancelQueries(['blog', updated.id]);
-      //     await queryClient.cancelQueries(['blogs']);
+      onMutate: async updated => {
+        // Cancel current queries for the blogs
+        await queryClient.cancelQueries(['blog', updated.id]);
+        await queryClient.cancelQueries(['blogs']);
 
-      //     // Get current blog
-      //     const currentBlog = queryClient.getQueryData<Blog[]>(['blog', updated.id]);
-      //     //   console.log('CURRENT BLOGS: ', currentBlogs);
+        // Get current blog
+        const currentBlog = queryClient.getQueryData<Blog[]>(['blog', updated.id]);
 
-      //     // Optimistically update blog
-      //     queryClient.setQueryData<Blog>(['blog', updated.id], oldBlog => ({
-      //       ...updated,
-      //     }));
-      //     // queryClient.setQueryData<Blog[]>(['blogs', page], oldBlogs =>
-      //     //   oldBlogs?.filter((blog: Blog) => (blog.id !== updated.id ? blog : updated)),
-      //     // );
+        // Optimistically update blog
+        queryClient.setQueryData<Blog>(['blog', updated.id], () => ({
+          ...updated,
+        }));
 
-      //     // Return current list of blogs, so we can rollback in case of failure.
-      //     return { currentBlog };
-      //   },
-      onSettled: (): void => {
+        // Return current blog, so we can rollback in case of failure.
+        return { currentBlog };
+      },
+      onSettled: (updated: Blog | undefined): void => {
         queryClient.invalidateQueries(['blog', updated?.id]);
       },
       onError: (error, variables, context): void => {

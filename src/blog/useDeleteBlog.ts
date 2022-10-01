@@ -13,25 +13,26 @@ export const useDeleteBlog = () => {
       });
 
       if (!response.ok) {
-        throw new Error('Some error message');
+        const error = await response.json();
+
+        throw new Error(`Error deleting blog: ${args.id}, Message: ${error.message}`);
       }
     },
     {
-      // onMutate: async ({ id, page }) => {
-      //   console.log('PARAMS: ', id, page);
-      //   // Cancel current queries for the blogs
-      //   await queryClient.cancelQueries(['blog']);
-      //   await queryClient.cancelQueries(['blogs']);
+      onMutate: async ({ id, page }) => {
+        // Cancel current queries for the blogs
+        await queryClient.cancelQueries(['blog', id]);
+        await queryClient.cancelQueries(['blogs']);
 
-      //   // Get current blogs
-      //   const currentBlogs = queryClient.getQueryData<Blog[]>(['blogs', page]);
+        // Get current blogs
+        const currentBlogs = queryClient.getQueryData<Blog[]>(['blogs']);
 
-      //   // Optimistically delete blog
-      //   queryClient.setQueryData<Blog[]>(['blogs', page], oldBlogs => oldBlogs?.filter((blog: Blog) => blog.id !== id));
+        // Optimistically delete blog
+        queryClient.setQueryData<Blog[]>(['blogs', page], oldBlogs => oldBlogs?.filter((blog: Blog) => blog.id !== id));
 
-      //   // Return current list of blogs, so we can rollback in case of failure.
-      //   return { currentBlogs };
-      // },
+        // Return current list of blogs, so we can rollback in case of failure.
+        return { currentBlogs };
+      },
       onSettled: (): void => {
         // Invalidate and refetch all blogs.
         queryClient.invalidateQueries(['blogs']);

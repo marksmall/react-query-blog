@@ -23,10 +23,12 @@ export const useBlogs = () =>
       // const response = await fetch(`${BLOGS_API}?page=${page}`);
 
       if (!response.ok) {
-        throw new Error('Some error message');
+        const error = await response.json();
+
+        throw new Error(`Error fetching blogs, Message: ${error.message}`);
       }
 
-      const data = await response.json();
+      const data: Blog = await response.json();
 
       return Blogs.parse(data);
     },
