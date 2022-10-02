@@ -83,8 +83,8 @@ const getBlogs = (page: number): Blog[] => {
 
   // console.log('PAGED: ', paged);
 
-  // return paged;
-  return blogs;
+  return paged;
+  // return blogs;
 };
 
 const getBlog = (id: number): Blog | undefined => blogs.find(blog => blog.id === id);

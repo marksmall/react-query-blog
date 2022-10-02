@@ -13,14 +13,14 @@ const Blogs = z.array(BlogData);
 
 export type Blog = z.infer<typeof BlogData>;
 
-// export const useBlogs = (page: number) =>
-export const useBlogs = () =>
+export const useBlogs = (page: number) =>
+  // export const useBlogs = () =>
   useQuery(
-    ['blogs'],
-    // ['blogs', page],
+    // ['blogs'],
+    ['blogs', page],
     async () => {
-      const response = await fetch(BLOGS_API);
-      // const response = await fetch(`${BLOGS_API}?page=${page}`);
+      // const response = await fetch(BLOGS_API);
+      const response = await fetch(`${BLOGS_API}?page=${page}`);
 
       if (!response.ok) {
         const error = await response.json();
